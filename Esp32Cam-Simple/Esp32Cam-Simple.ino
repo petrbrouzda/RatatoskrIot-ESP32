@@ -614,6 +614,33 @@ void onRequestImage(AsyncWebServerRequest *request) {
 
 
 
+void vlozPolozkuBool( AsyncResponseStream *response,
+                      bool brNaZacatku, 
+                      const char * text, 
+                      const char * cfgField,
+                      bool defaultVal  ) 
+{
+  response->printf( "%s%s<br>", brNaZacatku ? "<br>" : "", text);
+  char varName[50];
+  sprintf( varName, "camera_%s", cfgField );
+  bool val = config.getBool( varName, defaultVal );
+  response->printf( "<input type=\"text\" name=\"%s\" value=\"%d\">", cfgField, val ? 1 : 0 );
+}
+
+void vlozPolozkuInt( AsyncResponseStream *response,
+                      bool brNaZacatku, 
+                      const char * text, 
+                      const char * cfgField,
+                      int defaultVal  ) 
+{
+  response->printf( "%s%s<br>", brNaZacatku ? "<br>" : "", text);
+  char varName[50];
+  sprintf( varName, "camera_%s", cfgField );
+  long val = config.getLong( varName, defaultVal );
+  response->printf( "<input type=\"text\" name=\"%s\" value=\"%d\">", cfgField, val  );
+}
+
+
 void onRequestSetCamera(AsyncWebServerRequest *request){
   asyncLogger.log( "@ req setcamera" );
 
@@ -629,61 +656,31 @@ void onRequestSetCamera(AsyncWebServerRequest *request){
 
   response->print( "<h2>Otočení a zobrazení</h2>");
   response->print( "<form action=\"/setcamA\" method=\"GET\">");
-  response->print( "VFLIP - vertikální zrcadlo (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"vflip\" value=\"%d\">",
-                        config.getBool( "camera_vflip", false ) ? 1 : 0 );
-  response->print( "<br>HMIRROR - horizontální zrcadlo (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"hmirror\" value=\"%d\">",
-                        config.getBool( "camera_hmirror", false ) ? 1 : 0 );
-  response->print( "<br>Lens correction (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"lenscorr\" value=\"%d\">",
-                        config.getBool( "camera_lenscorr", false ) ? 1 : 0 );
+  vlozPolozkuBool( response, false, "VFLIP - vertikální zrcadlo (0/1):", "vflip", false  );
+  vlozPolozkuBool( response, true, "HMIRROR - horizontální zrcadlo (0/1):", "hmirror", false  );
+  vlozPolozkuBool( response, true, "Lens correction (0/1):", "lenscorr", false  );
   response->print( "<br><input type=\"submit\" name=\"send\" value=\"Zapiš\">");
   response->print( "</form>" );
     
   response->print( "<h2>Základní parametry</h2>");
   response->print( "<form action=\"/setcamA\" method=\"GET\">");
-  response->print( "raw gamma (0/1), 1 je lepší:<br>");
-  response->printf( "<input type=\"text\" name=\"rawgma\" value=\"%d\">",
-                        config.getBool( "camera_rawgma", true ) ? 1 : 0 );
-  response->print( "<br>kontrast (OV2640: -2 až 2, OV3660: -3 až 3):<br>");
-  response->printf( "<input type=\"text\" name=\"contrast\" value=\"%d\">",
-                        config.getLong( "camera_contrast", 2 ) );
-  response->print( "<br>jas (OV2640: -2 až 2, OV3660: -3 až 3):<br>");
-  response->printf( "<input type=\"text\" name=\"brightness\" value=\"%d\">",
-                        config.getLong( "camera_brightness", 0 ) );
-  response->print( "<br>saturace (OV2640: -2 až 2, OV3660: -4 až 4):<br>");
-  response->printf( "<input type=\"text\" name=\"saturation\" value=\"%d\">",
-                        config.getLong( "camera_saturation", -2 ) );
-  response->print( "<br>AE level (OV2640: -2 až 2, OV3660: -5 až 5):<br>");
-  response->printf( "<input type=\"text\" name=\"ae_level\" value=\"%d\">",
-                        config.getLong( "camera_ae_level", 0 ) );
+  vlozPolozkuBool( response, false, "Raw gamma (0/1), 1=lepší, prokreslené stíny, 0=černější černá:", "rawgma", true  );
+  vlozPolozkuInt( response, true, "Kontrast (OV2640: -2 až 2, OV3660: -3 až 3):", "contrast", 2  );
+  vlozPolozkuInt( response, true, "Jas (OV2640: -2 až 2, OV3660: -3 až 3):", "brightness", 0  );
+  vlozPolozkuInt( response, true, "Saturace (OV2640: -2 až 2, OV3660: -4 až 4):", "saturation", -2  );
+  vlozPolozkuBool( response, true, "Auto white balance (0/1)", "awb", true  );
+  vlozPolozkuInt( response, true, "Manual white balance (0=auto, 1=slunce, 2=mraky, 3=zářivky, 4=žárovky):", "wb_mode", 1 );
+  vlozPolozkuInt( response, true, "AE level (OV2640: -2 až 2, OV3660: -5 až 5):", "ae_level", 0  );
   response->print( "<br><input type=\"submit\" name=\"send\" value=\"Zapiš\">");
   response->print( "</form>" );
 
   response->print( "<h2>Expozice</h2>");
   response->print( "<form action=\"/setcamA\" method=\"GET\">");
-  response->print( "auto exposure (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"aec\" value=\"%d\">",
-                        config.getBool( "camera_aec", true ) ? 1 : 0 );
-  response->print( "<br>manual exposure level (0-1200):<br>");
-  response->printf( "<input type=\"text\" name=\"manual_exposure\" value=\"%d\">",
-                        config.getLong( "camera_manual_exposure", 600 ) );
-  response->print( "<br>AGC automatic gain control (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"agc\" value=\"%d\">",
-                        config.getBool( "camera_agc", true ) ? 1 : 0 );
-  response->print( "<br>AE gain ceiling (OV2640: 0-6, OV3660: 0-56):<br>");
-  response->printf( "<input type=\"text\" name=\"gainceiling\" value=\"%d\">",
-                        config.getLong( "camera_gainceiling", 6 ) );
-  response->print( "<br>exposure gain (OV2640: 0-30, OV3660: 1-64):<br>");
-  response->printf( "<input type=\"text\" name=\"manualgain\" value=\"%d\">",
-                        config.getLong( "camera_manualgain", 20 ) );
-  response->print( "<br>auto white balance (0/1):<br>");
-  response->printf( "<input type=\"text\" name=\"awb\" value=\"%d\">",
-                        config.getBool( "camera_awb", true ) ? 1 : 0 );
-  response->print( "<br>manual white balance (0=auto, 1=slunce, 2=mraky, 3=zářivky, 4=žárovky):<br>");
-  response->printf( "<input type=\"text\" name=\"wb_mode\" value=\"%d\">",
-                        config.getLong( "camera_wb_mode", 1 ) );
+  vlozPolozkuBool( response, false, "Auto exposure (0/1):", "aec", true  );
+  vlozPolozkuInt( response, true, "Manual exposure level (0-1200):", "manual_exposure", 600 );
+  vlozPolozkuBool( response, true, "AGC automatic gain control (0/1):", "agc", true  );
+  vlozPolozkuInt( response, true, "AGC gain ceiling (OV2640: 0-6, OV3660: 0-56):", "gainceiling", 6 );
+  vlozPolozkuInt( response, true, "Exposure gain (OV2640: 0-30, OV3660: 1-64):", "manualgain", 20 );
   response->print( "<br><input type=\"submit\" name=\"send\" value=\"Zapiš\">");
   response->print( "</form>" );
 
@@ -693,73 +690,39 @@ void onRequestSetCamera(AsyncWebServerRequest *request){
   request->send(response);
 }
 
+void zapisPolozkuInt( AsyncWebServerRequest *request,
+                      const char * cfgField ) 
+{
+  int v = webserver.getQueryParamAsLong( request, cfgField, -99999 );
+  if( v!=-99999 ) {
+    char varName[50];
+    sprintf( varName, "camera_%s", cfgField );
+    config.setValue( varName, v );
+    asyncLogger.log( "+ %s = %d", varName, v );
+  }
+}
+
 void onRequestSetCameraA(AsyncWebServerRequest *request) {
   asyncLogger.log( "@ req setwifiA" );
 
   // tohle je možné spustit jen přes AP, ne z internetu
   if( !filterApOnly(request) ) return;
 
-  int v = webserver.getQueryParamAsLong( request, "vflip", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_vflip", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "hmirror", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_hmirror", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "lenscorr", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_lenscorr", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "rawgma", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_rawgma", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "contrast", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_contrast", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "brightness", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_brightness", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "saturation", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_saturation", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "ae_level", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_ae_level", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "awb", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_awb", v );
-  }  
-  v = webserver.getQueryParamAsLong( request, "aec", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_aec", v );
-  }  
-  v = webserver.getQueryParamAsLong( request, "wb_mode", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_wb_mode", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "gainceiling", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_gainceiling", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "manualgain", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_manualgain", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "agc", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_agc", v );
-  }
-  v = webserver.getQueryParamAsLong( request, "manual_exposure", -999 );
-  if( v!=-999 ) {
-    config.setValue( "camera_manual_exposure", v );
-  }
-  
+  zapisPolozkuInt( request, "hmirror" );
+  zapisPolozkuInt( request, "lenscorr" );
+  zapisPolozkuInt( request, "rawgma" );
+  zapisPolozkuInt( request, "contrast" );
+  zapisPolozkuInt( request, "brightness" );
+  zapisPolozkuInt( request, "saturation" );
+  zapisPolozkuInt( request, "ae_level" );
+  zapisPolozkuInt( request, "awb" );
+  zapisPolozkuInt( request, "aec" );
+  zapisPolozkuInt( request, "wb_mode" );
+  zapisPolozkuInt( request, "gainceiling" );
+  zapisPolozkuInt( request, "manualgain" );
+  zapisPolozkuInt( request, "agc" );
+  zapisPolozkuInt( request, "manual_exposure" );
+
   tasker.setTimeout( reparamCamera, 1 );
 
   request->redirect("/setcamera");
