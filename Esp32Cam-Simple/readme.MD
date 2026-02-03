@@ -18,6 +18,8 @@ Pro sestavení potřebujete následující knihovny:
 * ESP Async WebServer (by ESP32Async) 3.9.6
 * Tasker (by Petr Stehlík) 2.0.3
 
+Před sestavením musíte aplikaci nakonfigurovat podle své desky a kamery.
+
 ## Konfigurace aplikace
 
 ### 1) Konfigurace desky
