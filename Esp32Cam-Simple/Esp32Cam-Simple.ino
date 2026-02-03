@@ -770,7 +770,7 @@ void onRequestSetCameraA(AsyncWebServerRequest *request) {
 // ESP32-CAM (AI Thinker)
 //    FQBN: esp32:esp32:esp32cam:PartitionScheme=min_spiffs
 // ESP32-S3-CAM
-//    FQBN: esp32:esp32:esp32s3:PartitionScheme=minimal,PSRAM=opi
+//    FQBN: esp32:esp32:esp32s3:PartitionScheme=min_spiffs,PSRAM=opi
 
 ESP32 arduino core 3.3.5
 
