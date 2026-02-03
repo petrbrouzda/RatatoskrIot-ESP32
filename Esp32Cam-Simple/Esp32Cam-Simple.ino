@@ -134,7 +134,7 @@ void setup() {
         config.getString( "ra_url", SERVER_URL_DEFAULT ), 
         config.getString( "ra_gallery_token", GALLERY_TOKEN_DEFAULT ) );
 
-  // jméno Wifi klienta, které je vidět ve správě  sítě (setClientHostname) bude rozšířeno o ID čipu, třeba "ESP_154545464" 
+  // jméno Wifi AP určené ve webserver-config.h bude rozšířeno o ID čipu, třeba "ESP_154154" 
   wifirunner.addChipIdToApHostname();
 
   const char * ssid = config.getString( "client_ssid", WIFI_STA_SSID );
