@@ -24,7 +24,7 @@ Pro sestavení potřebujete následující knihovny:
 
 1.A) Pokud máte desku ESP32-CAM, tj. tuhle:
 
-![ESP32-CAM](/doc/aithinker.jpg)
+![ESP32-CAM](doc/aithinker.jpg)
 
 tak v souboru [board_config.h](board_config.h) odkomentujte řádek
 
