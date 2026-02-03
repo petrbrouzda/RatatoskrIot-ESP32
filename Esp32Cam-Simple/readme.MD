@@ -95,7 +95,7 @@ Dole máte odkazy na jednotlivé nastavovací stránky. Můžete nastavit připo
 
 ## Nahrávání obrázků do galerie
 
-Po 30 sekundách od startu (firstShotMs) a pak každé dvě minuty (cameraSendPictureEveryMs) se odešle aktuální fotka do galerie s použitím tokenu z [defautltcfg.h](defautltcfg.h) nebo zadaného přes wifi.
+Po 30 sekundách od startu (firstShotMs) a pak každé dvě minuty (cameraSendPictureEveryMs) se odešle aktuální fotka do galerie s použitím tokenu z [defaultcfg.h](defaultcfg.h) nebo zadaného přes wifi.
 Pokud necháte API token, co je v souboru nyní, fotka bude vidět v této galerii:
 https://ratatoskr.lovecka.info/app/gallery/main/4/VerejnyTest
 
