@@ -67,7 +67,7 @@ Nejčastější verze je OV2640. Typ kamery je většinou napsán na plochém ka
 
 ### 3) Nastavení Wifi připojení
 
-V souboru [defautltcfg.h](defautltcfg.h) je konfigurace Wifi klienta (jméno sítě, heslo) a konfigurace galerie, do které se mají fotky nahrávat.
+V souboru [defaultcfg.h](defaultcfg.h) je konfigurace Wifi klienta (jméno sítě, heslo) a konfigurace galerie, do které se mají fotky nahrávat.
 Token, který je tam vložen, je platný.
 
 Všechny tyto konfigurační hodnoty můžete následně změnit připojením k wifi vašeho ESP.
