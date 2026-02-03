@@ -34,12 +34,12 @@ tak v souboru [board_config.h](board_config.h) odkomentujte řádek
 
 a zakomentujte ostatní varianty. V Arduino IDE zvolte typ desky "AI Thinker ESP32-CAM" a udělejte tato nastavení:
 
-![ESP32-CAM konfigurace](/doc/aithinker-config.png)
+![ESP32-CAM konfigurace](doc/aithinker-config.png)
 
 
 1.B Pokud máte desku ESP32S3-CAM, tj. tuhle:
 
-![ESP32S3-CAM](/doc/s3cam.jpg)
+![ESP32S3-CAM](doc/s3cam.jpg)
 
 tak v souboru [board_config.h](board_config.h) odkomentujte řádek
 
@@ -51,7 +51,7 @@ a zakomentujte ostatní varianty. Pozor, nesplést s ..._ESP_EYE!
 Pro připojení k počítači použijte pravý z USB konektorů (tak, jak je na fotce). 
 V Arduino IDE zvolte desku "ESP32S3 Dev Module" a udělejte tato nastavení:
 
-![ESP32S3-CAM konfigurace](/doc/s3cam-config.png)
+![ESP32S3-CAM konfigurace](doc/s3cam-config.png)
 
 ### 2) Nastavení kamery
 
@@ -87,11 +87,11 @@ A pak už by se telefon měl ozvat, že "Tato síť vyžaduje vaše přihlášen
 
 Objeví se stránka s informací o stavu zařízení a s aktuální fotkou:
 
-![aplikace 1](/doc/app1.png)
+![aplikace 1](doc/app1.png)
 
 Dole máte odkazy na jednotlivé nastavovací stránky. Můžete nastavit připojení k Wifi, připojení k serveru a pak taky vlastnosti kamery.
 
-![aplikace 2](/doc/app2.png)
+![aplikace 2](doc/app2.png)
 
 ## Nahrávání obrázků do galerie
 
