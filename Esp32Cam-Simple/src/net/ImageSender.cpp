@@ -209,7 +209,6 @@ bool ImageSender::connectToServer() {
 
 
 /**
- * Provede dotaz na server, odešle čekající data a načte čekající příkazy.
  * Vrátí true=povedlo se, false=nepodařilo se.
  */
 bool ImageSender::sendImage( const unsigned char * image, int imageSize, const char * fileName ) {

@@ -15,7 +15,7 @@
 #include "../logging/LoggerInterface.h"
 
 
-#define IMAGESENDER_VERSION "1.2 2026-01-31"
+#define IMAGESENDER_VERSION "1.2.1 2026-02-05"
 
 /** max délka status textu v http response */
 #define CP_HTTP_STATUS_LEN 50

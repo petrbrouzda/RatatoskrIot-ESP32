@@ -39,6 +39,7 @@ CameraHelper::CameraHelper(LoggerInterface *logger, BasicConfig * config, AppSta
  */ 
 void CameraHelper::cameraInit( camera_model_t cameraModel ) {
     this->cameraOK = false;
+    this->cameraModel = cameraModel;
 
     this->img.maxSize = NAS_FRAMEBUFFER_SIZE;
     this->img.data = (unsigned char *)ps_malloc(NAS_FRAMEBUFFER_SIZE);
@@ -82,25 +83,55 @@ void CameraHelper::cameraInit( camera_model_t cameraModel ) {
 
     this->camCfg->pixel_format = PIXFORMAT_JPEG; // YUV422,GRAYSCALE,RGB565,JPEG
 
-     //   For ESP32, do not use sizes above QVGA when not JPEG. The performance of the ESP32-S series has improved a lot, but JPEG mode always gives better frame rates.
-    if( cameraModel==CAMERA_OV2640 ) {
-      this->logger->log( "camera: OV2640, 1600x1200"); 
-      this->camCfg->frame_size = FRAMESIZE_UXGA;  
-    } else if( cameraModel==CAMERA_OV3660 ) {
-      this->logger->log( "camera: OV3660, 2048x1536"); 
-      this->camCfg->frame_size = FRAMESIZE_QXGA;  
-    } else if( cameraModel==CAMERA_OV5640 ) {
-      this->logger->log( "camera: OV5640, 2560x1920" );
-      this->camCfg->frame_size = FRAMESIZE_QSXGA;  
-    } else {
-      this->logger->log( "camera: neznamy typ, 1280x720" );
-      this->camCfg->frame_size = FRAMESIZE_HD;
-    }
+    // quality - podle ruznych zdroju:
+    // 0-63, for OV series camera sensors, lower number means higher quality
+    // 10-63 lower number means higher quality
+    int jpegQuality;
+    //   For ESP32, do not use sizes above QVGA when not JPEG. The performance of the ESP32-S series has improved a lot, but JPEG mode always gives better frame rates.
+    switch( cameraModel ) {
+      case CAMERA_OV2640:
+        this->logger->log( "camera: OV2640, 1600x1200"); 
+        jpegQuality = 10;
+        this->maxResolution = FRAMESIZE_UXGA;
+        this->expectedResolutionW = 1600;
+        this->expectedResolutionH = 1200; 
+        break;
 
-    this->camCfg->jpeg_quality = 6; //0-63, for OV series camera sensors, lower number means higher quality
+      case CAMERA_OV3660:
+        this->logger->log( "camera: OV3660, 2048x1536"); 
+        // hodnota 0-3 = pad kamery !
+        jpegQuality = 4;
+        this->maxResolution = FRAMESIZE_QXGA;
+        this->expectedResolutionW = 2048;
+        this->expectedResolutionH = 1536; 
+        // pokud neni nastaven default, nastavime ho - pro tuhle kameru je potreba vic nez 6!
+        if( this->config->getLong( "camera_gainceiling", -99999 ) == -99999 ) {
+          this->config->setValue( "camera_gainceiling", 40 );
+        }
+        break;
+
+      case CAMERA_OV5640:
+        this->logger->log( "camera: OV5640, 2560x1920" );
+        jpegQuality = 10;
+        this->maxResolution = FRAMESIZE_QSXGA;
+        this->expectedResolutionW = 2560;
+        this->expectedResolutionH = 1920; 
+        break;
+
+      default:
+        this->logger->log( "camera: neznamy typ, doplnte si konfiguraci, 1280x720" );
+        jpegQuality = 10;
+        this->maxResolution = FRAMESIZE_HD;
+        this->expectedResolutionW = 1280;
+        this->expectedResolutionH = 720; 
+        break;
+    }
+    this->logger->log( "rozliseni %d, jpeg quality %d", this->camCfg->frame_size, this->camCfg->jpeg_quality );   
+    this->camCfg->jpeg_quality = this->config->getLong( "camera_jpeq_quality", jpegQuality ); 
+    this->camCfg->frame_size = this->maxResolution;
+    
     this->camCfg->fb_count = 2; //When jpeg mode is used, if fb_count more than one, the driver will work in continuous mode.
     this->camCfg->grab_mode =  CAMERA_GRAB_LATEST; //CAMERA_GRAB_WHEN_EMPTY CAMERA_GRAB_LATEST. Sets when buffers should be filled
-  
     
   #if defined(CAMERA_MODEL_ESP_EYE)
     pinMode( Y3_GPIO_NUM, INPUT_PULLUP);    // 13
@@ -125,15 +156,16 @@ void CameraHelper::cameraInit( camera_model_t cameraModel ) {
 
     // ověřit typ kamery
     if( cameraModel==CAMERA_OV2640 && s->id.PID!=OV2640_PID) {
-      this->logger->log( "chyba konfigurace, ma to byt OV2640 a je to pid:%d", s->id.PID );   
+      
+      this->appState->setProblem( ERROR, "Camera init: chyba konfigurace, ma to byt OV2640 a je to pid:%d", s->id.PID );   
       this->cameraOK = false;
     }
     if( cameraModel==CAMERA_OV3660 && s->id.PID!=OV3660_PID) {
-      this->logger->log( "chyba konfigurace, ma to byt OV3660 a je to pid:%d", s->id.PID );   
+      this->appState->setProblem( ERROR, "Camera init: chyba konfigurace, ma to byt OV3660 a je to pid:%d", s->id.PID );   
       this->cameraOK = false;
     }
     if( cameraModel==CAMERA_OV5640 && s->id.PID!=OV5640_PID) {
-      this->logger->log( "chyba konfigurace, ma to byt OV5640 a je to pid:%d", s->id.PID );   
+      this->appState->setProblem( ERROR, "Camera init: chyba konfigurace, ma to byt OV5640 a je to pid:%d", s->id.PID );   
       this->cameraOK = false;
     }
 
@@ -185,7 +217,7 @@ gainceiling nezávisle na agc
 */                
   bool agc = this->config->getBool( "camera_agc", true );
   // OV2640: 0-6, OV3660: 0-56 
-  int gainCeiling = (int)this->config->getLong( "camera_gainceiling", 6);  
+  int gainCeiling = (int)this->config->getLong( "camera_gainceiling", 6 );  
   if( agc ) {
     this->logger->log( "* gain auto, ceiling=%d", gainCeiling );
     s->set_gain_ctrl(s, 1);  
@@ -202,7 +234,7 @@ gainceiling nezávisle na agc
   // raw gamma
   bool rawgma = this->config->getBool( "camera_rawgma", true );
   // OV2640: -2 .. 2, OV3660: -3 .. 3
-  int contrast = (int)this->config->getLong( "camera_contrast", 2);  
+  int contrast = (int)this->config->getLong( "camera_contrast", 0);  
   // OV2640: -2 .. 2, OV3660: -3 .. 3
   int brightness = (int)this->config->getLong( "camera_brightness", 0);  
   // OV2640: -2 .. 2, OV3660: -4 .. 4
@@ -282,7 +314,16 @@ bool CameraHelper::capture()
   }
 
   camera_fb_t *fb = NULL;
+
+  // po zmene rozliseni zahazujeme nekolik naslednych fotek
+  while( this->skipImages>0 ) {
+    fb = esp_camera_fb_get();
+    if( fb ) { esp_camera_fb_return(fb); }
+    this->skipImages--;
+  }
+
   fb = esp_camera_fb_get();
+
   if (!fb) {
     this->appState->setProblem( ERROR, "Chyba při focení: camera capture failed." );        
     this->errorsCapturingPhoto++;
@@ -291,6 +332,16 @@ bool CameraHelper::capture()
 
   if (fb->format != PIXFORMAT_JPEG) {
     this->appState->setProblem( ERROR, "Chyba při focení: obrázek neni JPEG." );        
+    this->errorsCapturingPhoto++;
+    esp_camera_fb_return(fb);
+    return false;
+  }
+
+  if( fb->width!=this->expectedResolutionW || fb->height!=this->expectedResolutionH ) {
+    this->logger->log("Obrazek ma rozliseni %dx%d, ale chci %dx%d", 
+      fb->width, fb->height, 
+      this->expectedResolutionW, this->expectedResolutionH
+    ); 
     this->errorsCapturingPhoto++;
     esp_camera_fb_return(fb);
     return false;
@@ -337,6 +388,46 @@ void CameraHelper::saveImage() {
     this->savedImg.timeTaken = this->img.timeTaken;
 }
 
+void CameraHelper::setMaximalResolution()
+{
+  this->setResolution( this->maxResolution );
+}
+
+void CameraHelper::setResolution(framesize_t resolution)
+{
+  switch( resolution ) {
+    case  FRAMESIZE_QSXGA:    // 2560x1920
+      this->expectedResolutionW = 2560;
+      this->expectedResolutionH = 1920; 
+      break;
+    case FRAMESIZE_QXGA:     // 2048x1536
+      this->expectedResolutionW = 2048;
+      this->expectedResolutionH = 1536; 
+      break;
+    case FRAMESIZE_UXGA:      // 1600x1200
+      this->expectedResolutionW = 1600;
+      this->expectedResolutionH = 1200;      
+      break;
+    case FRAMESIZE_HD:       // 1280x720
+      this->expectedResolutionW = 1280;
+      this->expectedResolutionH = 720;      
+      break;
+    case FRAMESIZE_VGA:      // 640x480
+      this->expectedResolutionW = 640;
+      this->expectedResolutionH = 480;      
+      break;
+    default:
+      this->logger->log( "Pro tohle rozliseni chybi konfigurace, doplnte do setResolution()!");
+      return;
+  }
+  sensor_t *s = esp_camera_sensor_get();
+  int res = 0;
+  res = s->set_framesize(s, (framesize_t)resolution);
+  if( res!=0 ) {
+    this->logger->log( "set_framesize: chyba %d", res );
+  }
+  this->skipImages = 2;
+}
 
 bool CameraHelper::hasImage()
 {

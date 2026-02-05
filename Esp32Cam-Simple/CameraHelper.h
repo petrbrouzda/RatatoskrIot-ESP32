@@ -13,12 +13,13 @@
 #include "src/toolkit/AppState.h"
 #include "src/toolkit/BasicConfig.h"
 
-#define CAMERAHELPER_VERSION "3.1 2026-02-02"
+#define CAMERAHELPER_VERSION "3.4 2026-02-05"
 
 
-  // nastavení pinů se bere z camera_pins.h podle zvolené desky v  board_config.h
+// nastavení pinů se bere z camera_pins.h podle zvolené desky v  board_config.h
 
 
+// budeme alokovat dva framebuffery o teto velikosti
 #define NAS_FRAMEBUFFER_SIZE 700000
 
 /**
@@ -41,7 +42,6 @@ class CameraHelper
     public:
         CameraHelper( LoggerInterface * logger, BasicConfig * config, AppState * appState );
 
-       
         /** 
          * Vlastní spuštění kamery; při chybě naplní appState.
          * 
@@ -88,12 +88,30 @@ class CameraHelper
          */
         int errorsCapturingPhoto = 0;
 
+        /** 
+         * Nastaví rozlišení na největší možné pro danou kameru
+         */
+        void setMaximalResolution();
+
+        /**
+         * Nastaví explicitní rozlišení
+         */
+        void setResolution( framesize_t resolution );
+
     private:
          LoggerInterface * logger;
          AppState * appState;
          BasicConfig * config;
 
          camera_config_t * camCfg;
+
+         camera_model_t cameraModel;
+
+         framesize_t maxResolution;
+         int expectedResolutionW;
+         int expectedResolutionH;
+
+         int skipImages = 0;
 
          std::mutex serial_mtx;
         
