@@ -67,7 +67,7 @@ Pokud si nastavíte pro nějaké specifické použití manuální expozici, mů�
   * WifiStatus_Connected(), WifiStatus_NotConnected() - Callbacky pro změnu stavu wifi klienta.
   * captureAndAnalyzeMotion() - Funkce volaná každých 100 msec. Sejme snímek, zavolá na něj detekci pohybu a pokud je pohyb detekován, vyfotí obrázek ve vysokém rozlišení, odešle snímky do galerie a naplánuje nafocení after-motion snímku.
   * captureFullSize() - Sejme jeden obrázek ve vysokém rozlišení.
-  * captureAndSendPeriodically() - Priodicky volaná fukce pro vyfocení a odeslání snímku jednou za 20 min, když se nic neděje (není detekován pohyb).
+  * captureAndSendPeriodically() - Periodicky volaná fukce pro vyfocení a odeslání snímku jednou za 20 min, když se nic neděje (není detekován pohyb).
   * sendImage() - Odeslání fotky do galerie.
   * loop() - Hlavní smyčka
   * a za ní následuje obsluha webserveru
