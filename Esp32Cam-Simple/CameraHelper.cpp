@@ -95,6 +95,11 @@ void CameraHelper::cameraInit( camera_model_t cameraModel ) {
         this->maxResolution = FRAMESIZE_UXGA;
         this->expectedResolutionW = 1600;
         this->expectedResolutionH = 1200; 
+        // pokud neni nastaven default, nastavime ho - pro tuhle kameru je awb nedobre
+        if( this->config->getLong( "camera_awb", -99999 ) == -99999 ) {
+          this->config->setValue( "camera_awb", (long)0 );
+          this->config->setValue( "camera_wb_mode", 1 );
+        }
         break;
 
       case CAMERA_OV3660:
@@ -104,7 +109,7 @@ void CameraHelper::cameraInit( camera_model_t cameraModel ) {
         this->maxResolution = FRAMESIZE_QXGA;
         this->expectedResolutionW = 2048;
         this->expectedResolutionH = 1536; 
-        // pokud neni nastaven default, nastavime ho - pro tuhle kameru je potreba vic nez 6!
+        // pokud neni nastaven default, nastavime ho - pro tuhle kameru je potreba vic !
         if( this->config->getLong( "camera_gainceiling", -99999 ) == -99999 ) {
           this->config->setValue( "camera_gainceiling", 40 );
         }
@@ -126,9 +131,9 @@ void CameraHelper::cameraInit( camera_model_t cameraModel ) {
         this->expectedResolutionH = 720; 
         break;
     }
-    this->logger->log( "rozliseni %d, jpeg quality %d", this->camCfg->frame_size, this->camCfg->jpeg_quality );   
     this->camCfg->jpeg_quality = this->config->getLong( "camera_jpeq_quality", jpegQuality ); 
     this->camCfg->frame_size = this->maxResolution;
+    this->logger->log( "rozliseni %d, jpeg quality %d", this->camCfg->frame_size, this->camCfg->jpeg_quality );   
     
     this->camCfg->fb_count = 2; //When jpeg mode is used, if fb_count more than one, the driver will work in continuous mode.
     this->camCfg->grab_mode =  CAMERA_GRAB_LATEST; //CAMERA_GRAB_WHEN_EMPTY CAMERA_GRAB_LATEST. Sets when buffers should be filled
@@ -217,7 +222,7 @@ gainceiling nezávisle na agc
 */                
   bool agc = this->config->getBool( "camera_agc", true );
   // OV2640: 0-6, OV3660: 0-56 
-  int gainCeiling = (int)this->config->getLong( "camera_gainceiling", 6 );  
+  int gainCeiling = (int)this->config->getLong( "camera_gainceiling", 2 );  
   if( agc ) {
     this->logger->log( "* gain auto, ceiling=%d", gainCeiling );
     s->set_gain_ctrl(s, 1);  
@@ -320,6 +325,8 @@ bool CameraHelper::capture()
     fb = esp_camera_fb_get();
     if( fb ) { esp_camera_fb_return(fb); }
     this->skipImages--;
+    Serial.print(".");
+    delay(20);
   }
 
   fb = esp_camera_fb_get();
@@ -426,7 +433,14 @@ void CameraHelper::setResolution(framesize_t resolution)
   if( res!=0 ) {
     this->logger->log( "set_framesize: chyba %d", res );
   }
-  this->skipImages = 2;
+  
+  if( this->cameraModel==CAMERA_OV2640) {
+    // Po změně rozlišení se u OV2640 resetuje automatická expozice!
+    // Je potřeba jí nechat nakalibrovat na pár fotkách.
+    this->skipImages = 10;  
+  } else {
+    this->skipImages = 2;
+  }
 }
 
 bool CameraHelper::hasImage()

@@ -245,17 +245,17 @@ void doCamera() {
 /** volano z taskeru kazde 2 min */
 void sendImage()
 {
+  if( !cameraHelper.hasImage() ) {
+    serialLogger.log("(nemam fotku!)" );
+    return;
+  }
+
   if( !wifirunner.isClientConnected() ) {
     imagesNotSent++;
     serialLogger.log("(nemam wifi, neposilam)" );
     return;
   }
   
-  if( !cameraHelper.hasImage() ) {
-    serialLogger.log("(nemam fotku!)" );
-    return;
-  }
-
   serialLogger.log( "odesilam: %dx%d px, %d b, #%d", 
       cameraHelper.img.w, cameraHelper.img.h, 
       cameraHelper.img.size, cameraHelper.imagesTaken );

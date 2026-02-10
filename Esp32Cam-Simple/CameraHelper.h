@@ -13,7 +13,7 @@
 #include "src/toolkit/AppState.h"
 #include "src/toolkit/BasicConfig.h"
 
-#define CAMERAHELPER_VERSION "3.4 2026-02-05"
+#define CAMERAHELPER_VERSION "3.4.3 2026-02-05"
 
 
 // nastavení pinů se bere z camera_pins.h podle zvolené desky v  board_config.h
@@ -59,7 +59,7 @@ class CameraHelper
         /** obrázek, se kterym pracujeme v hlavním threadu - pracovní buffer */
         SavedImage img;
 
-        /** je obrázek v pracovním bufferu? */
+        /** je v pracovním bufferu obrázek? */
         bool hasImage();
 
         /** obrazek, ktery je odlozeny pro webserver operaci saveImage() */
@@ -94,7 +94,7 @@ class CameraHelper
         void setMaximalResolution();
 
         /**
-         * Nastaví explicitní rozlišení
+         * Nastaví explicitně určené rozlišení
          */
         void setResolution( framesize_t resolution );
 

@@ -1,5 +1,16 @@
 # Esp32Cam-Simple
 
+## Obsah
+* [Co kde v aplikaci najdete](#co-kde-najdete)
+* [Sestavení aplikace](#sestaven%C3%AD-aplikace)
+* [Konfigurace aplikace](#konfigurace-aplikace)
+* [První spuštění](#prvn%C3%AD-spu%C5%A1t%C4%9Bn%C3%AD)
+* [Přístup přes lokální AP](#p%C5%99%C3%ADstup-p%C5%99es-lok%C3%A1ln%C3%AD-ap)
+* [Nahrávání obrázků do galerie](#nahr%C3%A1v%C3%A1n%C3%AD-obr%C3%A1zk%C5%AF-do-galerie)
+
+
+## Úvod
+
 Jednoduchá aplikace pro obsluhu kamery v ESP32. 
 Má následující funkce:
 * přes wifi odesílá periodicky fotky do galerie na https://ratatoskr.lovecka.info/
@@ -8,6 +19,43 @@ Má následující funkce:
   * nastavovat parametry kamery
   * nastavit Wifi připojení (SSID, heslo)
   * nastavit parametry připojení na galerii (token)
+
+Pokud hledáte obsluhu kamery včetbě detekce změn v obrazu ("detekce pohybu"), koukněte [sem](../Esp32Cam-MotionDetect/).
+
+
+## Co kde najdete?
+
+* **Esp32Cam-Simple.ino** - Vlastní základní kód aplikace.
+  * setup() - Inicializace kamery, wifi klienta, AP.
+  * userRoutes() - Nastavuje konfiguraci webserveru - jaká URL budou mapována na jaké funkce.
+  * WifiStatus_Connected(), WifiStatus_NotConnected() - Callbacky pro změnu stavu wifi klienta.
+  * doCamera() - Vyfotí obrázek, odešle snímek do galerie a naplánuje nafocení dalšího snímku.
+  * sendImage() - Odeslání fotky do galerie.
+  * loop() - Hlavní smyčka
+  * a za ní následuje obsluha webserveru
+  * (Pro periodické a časové spouštění operací v aplikaci se používá knihovna Tasker.)
+
+* **CameraHelper**  - Obsluha kamery. Inicializace, ověření správného typu kamery, nastavení provozních parametrů, přepínání rozlišení.
+
+* **board_config.h** - Konfigurace, jakou máte ESP32 desku. (Převzato ze samplu CameraWebServer)
+
+* **camera_pins.h** - Detailní konfigurace desky na základě volby v board_config.h. (Převzato ze samplu CameraWebServer)
+
+* **src/logging/** - Knihovny pro logování na sériový port (SerialLogger) a asynchronní logování (AsyncLogger). 
+  * Proč se nepoužívá Serial.println()? Protože použitím těchto knihoven zároveň vzniká možnost odesílání logů na server. (Což se v tomhle projektu nepoužívá.)
+
+* **src/net/WifiRunner** - Obsluha Wifi. Připojení k wifi v režimu klienta s automatickým reconnectem, pokud se spojení nedaří. Vytvoření AP pro připojení klientů k administraci aplikace.
+
+* **src/net/EasyWebServer** - Webový server pro kontrolu stavu a nastavení konfigurace aplikace.
+
+* **src/net/ImageSender** - Odesílání obrázků do galerie https://ratatoskr.lovecka.info/
+
+* **src/toolkit/AppState** - Sdílený stav aplikace. Sem se zapisují chyby, které jsou pak vypisovány ve webové administraci zařízení.
+
+* **src/toolkit/BasicConfig** a **src/toolkit/ConfigProviderSpiffs** - Konfigurace aplikace a její ukládání do SPIFFS.
+
+* **src/toolkit/DeviceInfo** - Výpis stavu paměti.
+
 
 ## Sestavení aplikace
 
@@ -75,6 +123,17 @@ Všechny tyto konfigurační hodnoty můžete následně změnit připojením k 
 ### 4) Nastavení Wifi AP
 
 V souboru [webserver-config.h](webserver-config.h) je konfigurace Wifi AP a webového serveru.
+
+
+## První spuštění
+
+Po prvním spuštěním vám aplikace na sériový port vypíše
+
+```
+E (3011) SPIFFS: mount failed, -10025
+```
+
+a asi na 20 sekund se zasekne. Nepropadejte panice - probíhá formát flash filesystému. Další starty už budou rychlé.
 
 
 ## Přístup přes lokální AP

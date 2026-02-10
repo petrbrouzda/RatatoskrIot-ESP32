@@ -7,7 +7,7 @@
 
 #include "../logging/LoggerInterface.h"
 
-#define WIFIRUNNER_VERSION "1.6 2026-01-07"
+#define WIFIRUNNER_VERSION "1.7 2026-02-09"
 
 /**
  * Nástroj pro práci s Wifi. Jednoduše konfiguruje wifi jak STA (client), tak AP.
@@ -40,7 +40,7 @@ void WifiStatus_NotConnected( int status );
 
 
 /** Pokud neni spojeni po tuto dobu, udela se reset wifi klienta */
-#define RESTART_WIFI_AFTER_MSEC 70000
+#define RESTART_WIFI_AFTER_MSEC 120000
 
 /** Na jakém kanálu má být AP? */
 #define SOFT_AP_CHANNEL 1
