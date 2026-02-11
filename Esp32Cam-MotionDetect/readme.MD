@@ -187,7 +187,9 @@ Připojte se na AP pojmenované "EspCam_123456" (kde číslo se liší podle ID 
 
 Pokud se telefon zeptá ve stylu "Tato síť není připojená do internetu, co mám dělat?", zvolte "Zachovat připojení".
 
-A pak už by se telefon měl ozvat, že "Tato síť vyžaduje vaše přihlášení" a automaticky vás přehodit na webovou stránku ESP kamery. Pokud to neudělá, spusťte webový prohlížeč a v něm otevřte adresu **http://192.168.59.1**
+A pak už by se telefon měl ozvat, že "Tato síť vyžaduje vaše přihlášení" a automaticky vás přehodit na webovou stránku ESP kamery. 
+Pokud to neudělá, spusťte webový prohlížeč a v něm otevřte adresu **http://200.200.200.1**
+
 
 Objeví se stránka s informací o stavu zařízení a s aktuální fotkou:
 
